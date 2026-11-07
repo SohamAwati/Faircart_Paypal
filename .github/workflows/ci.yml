@@ -1,0 +1,29 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres, POSTGRES_DB: faircart }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/faircart
+      DEMO_MODE: "true"
+      PAYPAL_CLIENT_ID: test
+      PAYPAL_CLIENT_SECRET: test
+      PAYPAL_BASE_URL: https://api-m.sandbox.paypal.com
+      FRONTEND_URL: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - name: Prisma migrations (skipped until the schema exists)
+        if: ${{ hashFiles('apps/api/prisma/migrations/**/migration.sql') != '' }}
+        run: npx prisma migrate deploy --schema apps/api/prisma/schema
+      - run: npm run typecheck --workspaces --if-present
+      - run: npm test --workspaces --if-present
+      - run: npm run build --workspaces --if-present
