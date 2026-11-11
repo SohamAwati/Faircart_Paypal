@@ -4,7 +4,7 @@
     "strict": true, "esModuleInterop": true, "skipLibCheck": true, "noEmit": true,
     "types": ["node"],
     "baseUrl": ".",
-    "paths": { "@faircart/shared": ["repo/packages/shared/src/payment/index.ts"] }
+    "paths": { "@faircart/shared": ["packages/shared/src/index.ts"] }
   },
-  "include": ["repo/apps/**/*.ts", "repo/packages/**/*.ts", "dev/**/*.ts"]
+  "include": ["apps/**/*.ts", "packages/**/*.ts", "dev/**/*.ts"]
 }
