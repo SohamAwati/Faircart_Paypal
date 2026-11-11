@@ -3,6 +3,7 @@
 body { margin:0; }
 nav { display:flex; flex-wrap:wrap; gap:.25rem 1rem; padding:.5rem 1rem; background:var(--navy); }
 nav a { color:#fff; min-height:44px; display:inline-flex; align-items:center; padding:0 .5rem; }
+nav .paypal-logo { height:2rem; width:auto; background:#fff; border-radius:4px; padding:2px 6px; align-self:center; }
 main { max-width:48rem; margin:0 auto; padding:1rem; } main.wide { max-width:70rem; }
 h1 { font-size:1.6rem; font-weight:700; color:var(--navy); margin:.5rem 0 1rem; } h2 { font-size:1.2rem; font-weight:600; margin:1.25rem 0 .5rem; } h3 { font-size:1.05rem; font-weight:600; margin:1rem 0 .5rem; }
 ul { list-style:disc; padding-left:1.25rem; } a { color:#1d4ed8; text-decoration:underline; } dt { font-weight:600; } dd { margin:0 0 .5rem; }

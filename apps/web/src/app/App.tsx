@@ -1,6 +1,7 @@
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { RouteFocus } from "../components/common/RouteFocus";
 import { DemoBanner } from "../components/common/DemoBanner";
+import { PayPalLogo } from "../components/common/PayPalLogo";
 import Placeholder from "../pages/Placeholder";
 import PaymentReturn from "../pages/PaymentReturn";
 import ApprovePay from "../pages/ApprovePay";
@@ -18,7 +19,7 @@ export default function App() {
       <a className="skip noprint" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById("main")?.focus(); }}>Skip to main content</a>
       <RouteFocus />
       <DemoBanner />
-      <nav className="noprint" aria-label="Main"><Link to="/">Dashboard</Link> <Link to="/requests/new">New request</Link> <Link to="/history">History</Link></nav>
+      <nav className="noprint" aria-label="Main"><PayPalLogo className="paypal-logo" /> <Link to="/">Dashboard</Link> <Link to="/requests/new">New request</Link> <Link to="/history">History</Link></nav>
       <div id="main" tabIndex={-1}>
       <Routes>
         <Route path="/" element={<Dashboard />} />
