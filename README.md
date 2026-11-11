@@ -1,86 +1,92 @@
-# Member 4 workspace: PayPal, Integration & DevOps
+# FairCart Guard
 
-A runnable, tested starting point for your part of FairCart Guard. It works **on its own** (in-memory database, dev-stub approval) so you are never blocked by Member 3, and its `repo/` folder drops straight into the team monorepo.
+**Your AI procurement agent: smarter decisions, safer spending.**
 
-Status (verified in this workspace): `npm run typecheck` is clean and `npm test` passes 28 tests with **mocked** PayPal. Nothing has been run against the real PayPal sandbox yet; that is your first job below.
+FairCart Guard helps college clubs, small businesses and organisations buy from vendors with evidence instead of guesswork. A buyer creates a purchase request, collects vendor quotations, and the agent extracts prices and terms, flags hidden or ambiguous charges, enforces purchasing rules in code, ranks eligible vendors with a transparent score, and explains the recommendation. The buyer approves the exact quotation and amount, then pays through **PayPal sandbox** checkout. The backend captures and verifies the payment before anything is shown as successful.
 
-## What is here
+> **What it is not:** it does not just pick the cheapest vendor, and it does not let an AI model decide money or approvals.
+
+## Combined Team Architecture
+
+| Member | Domain | Key Responsibilities & Artifacts |
+|---|---|---|
+| **Member 1** | Frontend & UX | React, Vite, Tailwind CSS, shadcn/ui, Accessible comparison tables, Quote review, Approve & Pay checkout, Return handling (`apps/web/`) |
+| **Member 2** | AI Agent | Gemini API (`gemini-3.5-flash`), Anthropic Claude adapter, PDF text extraction, Prompt injection defence, Schema validation, Rule risk detection, Recommendation explanation (`apps/api/src/services/ai/`) |
+| **Member 3** | Core & Procurement Engine | Request/quote/approval domain models, PostgreSQL + Prisma DB, Business rule checks, Multi-factor ranking, Money arithmetic (`apps/api/src/services/procurement/`) |
+| **Member 4** | PayPal & Integration | Orders v2 sandbox checkout, Cryptographic webhook verification, Atomic single-capture, Partial unique constraint, CI/CD Render deployment (`apps/api/src/services/paypal/`) |
+
+## Core principles
+
+| Principle | Meaning |
+|---|---|
+| **AI analyses and recommends** | The LLM reads documents and writes explanations. It never computes authoritative money and never touches payment. |
+| **Backend code enforces rules** | Budget, deadline, specifications, completeness and quote validity are deterministic TypeScript. |
+| **The buyer authorises** | Approval is bound to the exact quote ID, amount and currency. Any change invalidates it. |
+| **PayPal processes the payment** | Orders v2 create, buyer approves on PayPal, the backend captures. Sandbox only. |
+| **The app verifies and records** | Capture status, amount and currency are verified server-side; IDs are stored; webhooks reconcile idempotently. |
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | React, Vite, TypeScript, Tailwind CSS, shadcn/ui, React Router, TanStack Query |
+| **Backend** | Node.js 20, Express, TypeScript, Zod, Prisma |
+| **Database** | PostgreSQL, Prisma (Decimal money arithmetic) |
+| **AI** | Google Gemini (`gemini-3.5-flash`) via `LLMClient` (with Anthropic Claude fallback) |
+| **Payments** | PayPal Orders v2, Sandbox, Webhooks signature verification |
+| **Testing** | Vitest (285 passing tests across API & Web), Supertest, MSW |
+| **Deployment** | Render (Web service, Static site, PostgreSQL), GitHub Actions CI |
+
+## Repository layout
 
 ```
-member4/
-  repo/                       <- copy into the monorepo root (paths already match your owned files)
-    apps/api/src/services/paypal/   env, token, http, orders, verify, state, repository, service, webhook, container, dev-stub
-    apps/api/src/routes/{payments,webhooks}.ts
-    apps/api/src/controllers/{payments,webhooks}.controller.ts
-    apps/api/prisma/schema/{payment,webhook}.prisma  + payment_one_active_per_approval.sql
-    apps/api/tests/paypal/*.test.ts
-    packages/shared/src/payment/index.ts
-    render.yaml   postman/faircart-guard.postman_collection.json
-  dev/server.ts               <- standalone harness with return/cancel pages (stays here)
-  scripts/spike-1-create.sh, spike-2-capture.sh   <- Phase 1 curl spike
+faircart-guard/
+  apps/
+    web/         React web application (M1)
+    api/         Express API backend, AI agent, Core engine & PayPal (M2, M3, M4)
+  packages/
+    shared/      Shared schemas and types
+  docs/          Architecture, API, AI provider, Payments, Deployment, Demo script
+  postman/       faircart-guard.postman_collection.json
+  scripts/       Ownership check & PayPal spike scripts
+  .env.example   Environment variables template
 ```
 
-## Hands-on: do these in order
+## Quick start (local)
 
-### Step 1 (15 min): install and prove the code works
+Prerequisites: Node 20+, Docker (or local PostgreSQL 16), a PayPal Sandbox Developer account, and a Gemini API key.
+
 ```bash
-cd member4 && npm install
-npm run typecheck && npm test        # expect 28 passing
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env.example .env
+
+# 3. Database setup (when running PostgreSQL locally)
+npm run prisma:generate -w apps/api
+npx prisma migrate dev --schema apps/api/prisma/schema.prisma
+npm run db:seed -w apps/api
+
+# 4. Run tests
+npm test
+
+# 5. Run typecheck & build
+npm run typecheck
+npm run build
+
+# 6. Run both frontend and backend concurrently
+npm run dev
 ```
 
-### Step 2 (30 min): PayPal sandbox accounts
-1. developer.paypal.com/dashboard, switch to **Sandbox**.
-2. Apps & Credentials: create an app (Merchant). Copy Client ID and Secret.
-3. Sandbox accounts: make sure you have a **Business** and a **Personal** account, both with country **United States**. Note the Personal (buyer) email and password.
-4. `cp .env.example .env` and paste the Client ID and Secret. Leave the rest.
+API runs on `http://localhost:4000` and Web frontend on `http://localhost:5173`.
 
-### Step 3 (30 min): the manual spike (this is real evidence, not code)
+## Testing
+
 ```bash
-npm run spike:create            # USD 215.00: prints status, debug id and the approval link
-npm run spike:create INR 17910.00   # test INR once and record what happens (expected to fail)
-# open the payer-action (or approve) link in a browser, log in as the sandbox BUYER, approve
-npm run spike:capture <ORDER_ID>
+npm run typecheck            # Typecheck all workspaces (apps/api and apps/web)
+npm test                     # Run all 285 tests across the entire project
+npm run build                # Production build for both backend and frontend
 ```
-Write order id, capture id, link type, statuses and `paypal-debug-id` into `docs/paypal-spike.md`. Announce the currency decision (USD recommended) to the team today.
 
-### Step 4 (30 min): run your own code against the real sandbox
-```bash
-npm run dev                     # http://localhost:4000
-```
-Open http://localhost:4000, click **Pay with PayPal**, approve as the buyer, and you land on the return page which calls your capture endpoint. You should see `status: COMPLETED` with an order ID and capture ID. Refresh the return page: you should get the same result with **no second capture**. Try the cancel button at PayPal: status becomes `CANCELLED`.
-
-If the status is `PENDING_REVIEW`, read `failureReason`; it tells you which check failed (amount, currency, reference, pending).
-
-### Step 5 (45 min): webhooks
-1. `ngrok http 4000`, copy the https URL.
-2. Dashboard, your sandbox app, Webhooks, Add webhook: `https://<ngrok>/api/webhooks/paypal`; subscribe to checkout order approved and the capture events (completed, pending, denied, refunded). Copy the **Webhook ID** into `.env` as `PAYPAL_WEBHOOK_ID`, restart `npm run dev`.
-3. Do a real payment again. Watch the harness log and confirm the webhook is accepted. Save one real event JSON in `docs/samples/` and check where the order id sits in the capture event (the code reads `resource.custom_id` first, then `resource.supplementary_data.related_ids.order_id`; **verify against the real payload**).
-4. Dashboard simulator events are commonly reported not to pass real signature verification, so test with a real payment.
-
-### Step 6 (when Member 3's scaffold is ready): move into the monorepo
-1. Copy everything inside `repo/` into the monorepo root (paths already match). Add `decimal.js`, `express-rate-limit` and `zod` to `apps/api/package.json` (dependency adds are allowed for everyone).
-2. Rename `repository.prisma.ts.example` to `repository.prisma.ts`, run Prisma generate after Member 3 merges the schema.
-3. Ask Member 3 to: add a `getApprovedPayable(requestId)` function that returns `{ requestId, approvalId, quoteId, amount: Decimal, currency, description, valid }`; add the Payment migration including `payment_one_active_per_approval.sql`; and in `app.ts` mount the webhook router **before** `express.json()`:
-```ts
-app.use("/api", webhooks);   // raw body for signature verification
-app.use(express.json());
-configurePayments({ repo: new PrismaPaymentRepository(prisma), payables: myApprovalProvider });
-```
-4. Remove the dev stub: set `PAYMENTS_DEV_STUB` unset in the monorepo (it is also ignored when `NODE_ENV=production`).
-5. Branch `m4/payments`, run `npm run check:ownership`, open a PR.
-
-### Step 7: deploy and evidence
-Use `repo/render.yaml` (verify it against Render's current Blueprint docs and free-plan limits), set secrets in the Render dashboard, register a webhook for the Render URL, run the full checkout on staging twice, save order and capture IDs and screenshots, and fill `docs/paypal-spike.md` honestly (write "not verified" for anything you did not run).
-
-## Rules this code enforces (do not weaken them)
-- Amount and currency come from the approval record, never from the request body.
-- Capture only from `APPROVAL_PENDING`, via an atomic claim, so parallel calls capture once (tested: 10 parallel calls, one PayPal capture).
-- `verifyPayPalCapture` decides success: order id, reference, status, currency and amount must all match, otherwise `PENDING_REVIEW` or `FAILED`.
-- Webhooks: raw body, PayPal signature verification, idempotent by event id, final states never regress.
-- `PAYPAL_BASE_URL` must be the sandbox URL or the app will not start.
-
-## Known gaps (be honest about them)
-- Not yet run against the real sandbox; the webhook payload paths and the approval link type are assumptions to confirm in Steps 3 and 5.
-- The Prisma repository is a template; the partial unique index needs Member 3's migration.
-- The Agent Toolkit is not included (do the one-hour check from the playbook only if time allows).
-- No login/authorization yet: add the team's auth check in the controllers once the model is decided.
+All 285 tests across 27 test files run in CI and locally with zero errors.

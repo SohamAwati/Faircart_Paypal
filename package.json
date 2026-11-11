@@ -1,26 +1,23 @@
 {
-  "name": "member4-paypal-workspace",
+  "name": "faircart-guard",
   "private": true,
-  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "engines": { "node": ">=20" },
   "scripts": {
-    "dev": "tsx watch dev/server.ts",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "dev": "concurrently -n api,web \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:harness": "tsx watch dev/server.ts",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "check:ownership": "node scripts/check-ownership.mjs",
     "spike:create": "bash scripts/spike-1-create.sh",
     "spike:capture": "bash scripts/spike-2-capture.sh"
   },
-  "dependencies": {
-    "decimal.js": "^10.4.3",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.4.0",
-    "zod": "^3.23.8"
-  },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.14.0",
-    "msw": "^2.4.0",
-    "tsx": "^4.16.0",
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
+    "concurrently": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
   }
 }

@@ -2,6 +2,8 @@ import { createApp } from './app';
 import { getEnv } from './config/env';
 import { disconnectPrisma, getPrisma } from './db';
 import { configurePayments, PrismaPaymentRepository, PrismaWebhookEventStore, ProcurementPayableProvider } from './services/paypal';
+import { setAiAnalysisPort } from './services/procurement/integration/aiPortProvider';
+import { RealAiAnalysisPort } from './services/ai/aiPortAdapter';
 
 const env = getEnv();
 const prisma = getPrisma();
@@ -10,6 +12,7 @@ configurePayments({
   events: new PrismaWebhookEventStore(prisma),
   payables: new ProcurementPayableProvider(),
 });
+setAiAnalysisPort(new RealAiAnalysisPort());
 
 const app = createApp();
 
