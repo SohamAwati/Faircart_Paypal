@@ -5,8 +5,8 @@ import express from "express";
 import { loadEnv } from "./loadEnv";
 loadEnv();
 
-const { default: payments } = await import("../repo/apps/api/src/routes/payments");
-const { default: webhooks } = await import("../repo/apps/api/src/routes/webhooks");
+const { default: payments } = await import("../apps/api/src/routes/payments");
+const { default: webhooks } = await import("../apps/api/src/routes/webhooks");
 
 const app = express();
 app.use("/api", webhooks);          // raw body: must be BEFORE express.json()
