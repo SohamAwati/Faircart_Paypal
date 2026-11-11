@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "ESNext", "moduleResolution": "Bundler",
+    "strict": true, "esModuleInterop": true, "skipLibCheck": true, "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": { "@faircart/shared": ["repo/packages/shared/src/payment/index.ts"] }
+  },
+  "include": ["repo/apps/**/*.ts", "repo/packages/**/*.ts", "dev/**/*.ts"]
+}

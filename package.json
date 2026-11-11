@@ -1,0 +1,26 @@
+{
+  "name": "member4-paypal-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch dev/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "spike:create": "bash scripts/spike-1-create.sh",
+    "spike:capture": "bash scripts/spike-2-capture.sh"
+  },
+  "dependencies": {
+    "decimal.js": "^10.4.3",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "msw": "^2.4.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
