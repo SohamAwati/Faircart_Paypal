@@ -7,8 +7,8 @@ services:
     name: faircart-api
     runtime: node
     buildCommand: >-
-      npm ci && npm run build -w apps/api &&
-      npx prisma migrate deploy --schema apps/api/prisma/schema
+      npm ci && npm run prisma:generate -w apps/api && npm run build -w apps/api &&
+      npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
     startCommand: npm run start -w apps/api
     healthCheckPath: /health
     envVars:
