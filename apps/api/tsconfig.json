@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
@@ -9,12 +9,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@faircart/shared": ["../../packages/shared/src/index"]
-    },
+    "rootDir": "src",
     "outDir": "dist",
-    "noEmit": true
+    "noEmit": false
   },
-  "include": ["src", "tests", "prisma/seed.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests"]
 }
