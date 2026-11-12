@@ -8,3 +8,5 @@ dist/
 .spike_token
 .spike_order_response.txt
 
+.vercel
+.env*
